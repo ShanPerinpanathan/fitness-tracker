@@ -29,6 +29,9 @@ const IC = {
   close:    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
 };
 
+// ─── Daily calorie target (change this whenever you want) ────────
+const CAL_TARGET = 1700;
+
 const NAV = [
   { id: 'today',        icon: 'flame',    label: 'Today'    },
   { id: 'workout',      icon: 'dumbbell', label: 'Workout'  },
@@ -721,14 +724,34 @@ function NutritionTab({ date, dayData, onUpdate }) {
   const plan = MEALS[getMealType(date)];
   const toggle = id => onUpdate({ ...dayData, meals: { ...dayData?.meals, [id]: !dayData?.meals?.[id] } });
 
-  // Sum all custom food macros logged today
+  // Sum checked blueprint meal macros
+  const checkedMeals = dayData?.meals || {};
+  const blueprintTotals = Object.values(plan.meals).flat().reduce((acc, item) => {
+    if (checkedMeals[item.id]) {
+      acc.cal     += item.cal     || 0;
+      acc.carbs   += item.carbs   || 0;
+      acc.protein += item.protein || 0;
+      acc.fats    += item.fats    || 0;
+    }
+    return acc;
+  }, { cal: 0, carbs: 0, protein: 0, fats: 0 });
+
+  // Sum custom searched foods
   const allCustom = Object.values(dayData?.customFoods || {}).flat();
-  const customTotals = allCustom.reduce((acc, f) => ({
+  const customFoodTotals = allCustom.reduce((acc, f) => ({
     carbs:   acc.carbs   + (f.carbs   || 0),
     protein: acc.protein + (f.protein || 0),
     fats:    acc.fats    + (f.fats    || 0),
     cal:     acc.cal     + (f.cal     || 0),
   }), { carbs: 0, protein: 0, fats: 0, cal: 0 });
+
+  // Combined totals — blueprint checked + custom searched
+  const customTotals = {
+    cal:     blueprintTotals.cal     + customFoodTotals.cal,
+    carbs:   blueprintTotals.carbs   + customFoodTotals.carbs,
+    protein: blueprintTotals.protein + customFoodTotals.protein,
+    fats:    blueprintTotals.fats    + customFoodTotals.fats,
+  };
 
   const remaining = {
     carbs:   Math.max(0, plan.macros.carbs   - Math.round(customTotals.carbs)),
@@ -744,14 +767,31 @@ function NutritionTab({ date, dayData, onUpdate }) {
         <div className="section-sub">{plan.label} · {plan.macros.carbs}C / {plan.macros.protein}P / {plan.macros.fats}F</div>
       </div>
 
-      {/* Live macro budget */}
+      {/* Live macro + calorie budget */}
       <div className="macro-budget-card">
-        <div className="mb-row">
-          <div className="mb-item">
-            <span className="mb-val" style={{ color: customTotals.carbs > plan.macros.carbs ? '#E94560' : '#f59e0b' }}>{Math.round(customTotals.cal)}</span>
-            <span className="mb-lbl">cal logged</span>
+        {/* Calorie bar */}
+        <div className="cal-budget-row">
+          <div className="cal-budget-info">
+            <span className="cal-budget-val" style={{ color: customTotals.cal > CAL_TARGET ? '#E94560' : '#f59e0b' }}>
+              {Math.round(customTotals.cal)}
+            </span>
+            <span className="cal-budget-slash">/</span>
+            <span className="cal-budget-target">{CAL_TARGET} cal</span>
+            <span className="cal-budget-left" style={{ color: customTotals.cal > CAL_TARGET ? '#E94560' : '#10B981' }}>
+              {customTotals.cal > CAL_TARGET
+                ? `${Math.round(customTotals.cal - CAL_TARGET)} over`
+                : `${Math.round(CAL_TARGET - customTotals.cal)} left`}
+            </span>
           </div>
-          <div className="mb-divider" />
+          <div className="cal-bar-track">
+            <div className="cal-bar-fill" style={{
+              width: `${Math.min(100, Math.round((customTotals.cal / CAL_TARGET) * 100))}%`,
+              background: customTotals.cal > CAL_TARGET ? '#E94560' : customTotals.cal > CAL_TARGET * 0.85 ? '#f59e0b' : '#10B981'
+            }} />
+          </div>
+        </div>
+        {/* Macro row */}
+        <div className="mb-row" style={{ marginTop: 10 }}>
           <div className="mb-item">
             <span className="mb-val" style={{ color: customTotals.carbs > plan.macros.carbs ? '#E94560' : '#E94560' }}>{Math.round(customTotals.carbs)}g</span>
             <span className="mb-lbl">carbs used</span>
@@ -763,10 +803,15 @@ function NutritionTab({ date, dayData, onUpdate }) {
           </div>
           <div className="mb-divider" />
           <div className="mb-item">
+            <span className="mb-val" style={{ color: '#6C63FF' }}>{Math.round(customTotals.fats)}g</span>
+            <span className="mb-lbl">fats used</span>
+          </div>
+          <div className="mb-divider" />
+          <div className="mb-item">
             <span className="mb-val" style={{ color: over ? '#E94560' : 'var(--txt2)' }}>
               {over ? 'Over!' : remaining.carbs + 'g'}
             </span>
-            <span className="mb-lbl">{over ? 'budget' : 'carbs left'}</span>
+            <span className="mb-lbl">carbs left</span>
           </div>
         </div>
       </div>
