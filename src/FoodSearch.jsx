@@ -1,49 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 
-// ─── API ─────────────────────────────────────────────────────────
+// ─── API — calls our own Vercel proxy (avoids CORS) ─────────────
 const searchFood = async (query) => {
-  // Primary: USDA FoodData Central — open, no auth needed, CORS-friendly
-  const usdaUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(query)}&pageSize=10&dataType=SR%20Legacy,Survey%20(FNDDS),Foundation&api_key=DEMO_KEY`;
-  try {
-    const res = await fetch(usdaUrl);
-    if (!res.ok) throw new Error('USDA error');
-    const data = await res.json();
-    const foods = (data.foods || []).slice(0, 8);
-    if (foods.length > 0) {
-      // Normalise USDA format to match our getMacros shape
-      return foods.map(f => {
-        const n = {};
-        (f.foodNutrients || []).forEach(fn => {
-          const name = (fn.nutrientName || '').toLowerCase();
-          if (name.includes('energy') && name.includes('kcal')) n['energy-kcal_100g'] = fn.value;
-          else if (name === 'protein') n['proteins_100g'] = fn.value;
-          else if (name.includes('carbohydrate') && name.includes('difference')) n['carbohydrates_100g'] = fn.value;
-          else if (name === 'total lipid (fat)') n['fat_100g'] = fn.value;
-          else if (name.includes('fiber')) n['fiber_100g'] = fn.value;
-          else if (name.includes('sugars, total')) n['sugars_100g'] = fn.value;
-        });
-        // fallback carb field
-        if (!n['carbohydrates_100g']) {
-          const carb = (f.foodNutrients || []).find(fn => (fn.nutrientName || '').toLowerCase().includes('carbohydrate'));
-          if (carb) n['carbohydrates_100g'] = carb.value;
-        }
-        return {
-          product_name: f.description,
-          brands: f.brandOwner || f.brandName || '',
-          nutriments: n,
-          serving_quantity: f.servingSize || null,
-        };
-      }).filter(p => p.nutriments['energy-kcal_100g'] != null);
-    }
-  } catch {}
-  // Fallback: Open Food Facts with no-cors-friendly v2 endpoint
-  const offUrl = `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(query)}&page_size=10&fields=product_name,brands,nutriments,serving_quantity&json=1`;
-  const res2 = await fetch(offUrl, { headers: { 'User-Agent': 'BlueprintTracker/1.0' } });
-  if (!res2.ok) throw new Error('Both search APIs failed');
-  const data2 = await res2.json();
-  return (data2.products || [])
-    .filter(p => p.product_name && p.nutriments && p.nutriments['energy-kcal_100g'] != null)
-    .slice(0, 8);
+  const res = await fetch(`/api/food-search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error(`Proxy error ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.products || [];
 };
 
 const safe = (val) => { const n = parseFloat(val); return isNaN(n) ? 0 : n; };

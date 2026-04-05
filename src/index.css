@@ -250,3 +250,13 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-
 .mb-val{font-size:16px;font-weight:800}
 .mb-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
 .mb-divider{width:1px;height:30px;background:var(--bdr)}
+
+/* ─── Calorie budget bar ─────────────────────────────────────── */
+.cal-budget-row{margin-bottom:2px}
+.cal-budget-info{display:flex;align-items:baseline;gap:5px;margin-bottom:6px;flex-wrap:wrap}
+.cal-budget-val{font-size:22px;font-weight:800;color:#f59e0b}
+.cal-budget-slash{font-size:16px;color:var(--txt3)}
+.cal-budget-target{font-size:14px;font-weight:600;color:var(--txt2)}
+.cal-budget-left{font-size:12px;font-weight:700;margin-left:auto}
+.cal-bar-track{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.cal-bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
