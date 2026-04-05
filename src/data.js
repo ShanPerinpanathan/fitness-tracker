@@ -84,24 +84,24 @@ export const MEALS = {
     label: 'Workout Day', macros: { carbs: 175, protein: 175, fats: 70 },
     meals: {
       breakfast: [
-        { id: 'b1', item: '4 Whole Eggs', note: 'Can add mushrooms, spinach, onions & peppers' },
-        { id: 'b2', item: '45g Quaker Whole Grain Oats', note: 'Old Fashioned — add Stevia to taste' },
+        { id: 'b1', item: '4 Whole Eggs', note: 'Can add mushrooms, spinach, onions & peppers', cal: 280, carbs: 2, protein: 24, fats: 20 },
+        { id: 'b2', item: '45g Quaker Whole Grain Oats', note: 'Old Fashioned — add Stevia to taste', cal: 170, carbs: 30, protein: 6, fats: 3 },
       ],
       lunch: [
-        { id: 'l1', item: '170g Ground Beef 93% lean', note: 'Or top sirloin steak or salmon' },
-        { id: 'l2', item: '220g White Rice', note: 'Or 300g White Potatoes' },
-        { id: 'l3', item: '1–2 Cups Green Vegetables', note: '' },
+        { id: 'l1', item: '170g Ground Beef 93% lean', note: 'Or top sirloin steak or salmon', cal: 265, carbs: 0, protein: 38, fats: 12 },
+        { id: 'l2', item: '220g White Rice', note: 'Or 300g White Potatoes', cal: 286, carbs: 63, protein: 5, fats: 0 },
+        { id: 'l3', item: '1–2 Cups Green Vegetables', note: '', cal: 40, carbs: 8, protein: 3, fats: 0 },
       ],
       dinner: [
-        { id: 'd1', item: '190g Chicken Breast', note: '' },
-        { id: 'd2', item: '340g Sweet Potatoes', note: '' },
-        { id: 'd3', item: '½ Avocado', note: '' },
-        { id: 'd4', item: '1–2 Cups Green Vegetables', note: '' },
+        { id: 'd1', item: '190g Chicken Breast', note: '', cal: 295, carbs: 0, protein: 56, fats: 6 },
+        { id: 'd2', item: '340g Sweet Potatoes', note: '', cal: 309, carbs: 72, protein: 6, fats: 0 },
+        { id: 'd3', item: '½ Avocado', note: '', cal: 120, carbs: 6, protein: 1, fats: 11 },
+        { id: 'd4', item: '1–2 Cups Green Vegetables', note: '', cal: 40, carbs: 8, protein: 3, fats: 0 },
       ],
       lateSnack: [
-        { id: 's1', item: '315g Fage Total Plain 2% Greek Yogurt', note: '' },
-        { id: 's2', item: '350g Strawberries', note: 'Or 455g Blackberries' },
-        { id: 's3', item: 'Stevia to taste', note: '' },
+        { id: 's1', item: '315g Fage Total Plain 2% Greek Yogurt', note: '', cal: 220, carbs: 14, protein: 32, fats: 5 },
+        { id: 's2', item: '350g Strawberries', note: 'Or 455g Blackberries', cal: 112, carbs: 27, protein: 2, fats: 1 },
+        { id: 's3', item: 'Stevia to taste', note: '', cal: 0, carbs: 0, protein: 0, fats: 0 },
       ]
     }
   },
@@ -109,23 +109,23 @@ export const MEALS = {
     label: 'Rest Day', macros: { carbs: 120, protein: 175, fats: 70 },
     meals: {
       breakfast: [
-        { id: 'rb1', item: '4 Whole Eggs', note: 'Can add mushrooms, spinach, onions & peppers' },
-        { id: 'rb2', item: '45g Quaker Whole Grain Oats', note: 'Old Fashioned — add Stevia to taste' },
+        { id: 'rb1', item: '4 Whole Eggs', note: 'Can add mushrooms, spinach, onions & peppers', cal: 280, carbs: 2, protein: 24, fats: 20 },
+        { id: 'rb2', item: '45g Quaker Whole Grain Oats', note: 'Old Fashioned — add Stevia to taste', cal: 170, carbs: 30, protein: 6, fats: 3 },
       ],
       lunch: [
-        { id: 'rl1', item: '170g Ground Beef 93% lean', note: 'Or top sirloin steak or salmon' },
-        { id: 'rl2', item: '1–2 Cups Green Vegetables', note: 'No rice or potatoes on rest days' },
+        { id: 'rl1', item: '170g Ground Beef 93% lean', note: 'Or top sirloin steak or salmon', cal: 265, carbs: 0, protein: 38, fats: 12 },
+        { id: 'rl2', item: '1–2 Cups Green Vegetables', note: 'No rice or potatoes on rest days', cal: 40, carbs: 8, protein: 3, fats: 0 },
       ],
       dinner: [
-        { id: 'rd1', item: '190g Chicken Breast', note: '' },
-        { id: 'rd2', item: '380g Sweet Potatoes', note: '' },
-        { id: 'rd3', item: '½ Avocado', note: '' },
-        { id: 'rd4', item: '1–2 Cups Green Vegetables', note: '' },
+        { id: 'rd1', item: '190g Chicken Breast', note: '', cal: 295, carbs: 0, protein: 56, fats: 6 },
+        { id: 'rd2', item: '380g Sweet Potatoes', note: '', cal: 345, carbs: 80, protein: 6, fats: 0 },
+        { id: 'rd3', item: '½ Avocado', note: '', cal: 120, carbs: 6, protein: 1, fats: 11 },
+        { id: 'rd4', item: '1–2 Cups Green Vegetables', note: '', cal: 40, carbs: 8, protein: 3, fats: 0 },
       ],
       lateSnack: [
-        { id: 'rs1', item: '315g Fage Total Plain 2% Greek Yogurt', note: '' },
-        { id: 'rs2', item: '350g Strawberries', note: 'Or 455g Blackberries' },
-        { id: 'rs3', item: 'Stevia to taste', note: '' },
+        { id: 'rs1', item: '315g Fage Total Plain 2% Greek Yogurt', note: '', cal: 220, carbs: 14, protein: 32, fats: 5 },
+        { id: 'rs2', item: '350g Strawberries', note: 'Or 455g Blackberries', cal: 112, carbs: 27, protein: 2, fats: 1 },
+        { id: 'rs3', item: 'Stevia to taste', note: '', cal: 0, carbs: 0, protein: 0, fats: 0 },
       ]
     }
   }
