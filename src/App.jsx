@@ -698,7 +698,18 @@ function WorkoutTab({ date, dayData, onUpdate, sched }) {
             onToggle={() => setExpandedId(expandedId === ex.id ? null : ex.id)} />
         ))}
       </div>
-      <div className="cardio-reminder">{IC.run} Don't forget: {sched.type === 'cardio' ? '45 min' : '20 min'} cardio after — Incline 8.0 · Speed 2.0</div>
+      <div className="cardio-check-row" onClick={() => onUpdate({ ...dayData, cardio: !dayData?.cardio })}>
+        <div className="cardio-check-left">
+          <span style={{ color: '#6C63FF' }}>{IC.run}</span>
+          <div>
+            <div className="cardio-check-title">{sched.type === 'cardio' ? '45 min Cardio' : '20 min Post-Workout Cardio'}</div>
+            <div className="cardio-check-spec">Incline 8.0 · Speed 2.0</div>
+          </div>
+        </div>
+        <div className={`cardio-chk ${dayData?.cardio ? 'cardio-chk-done' : ''}`}>
+          {dayData?.cardio && IC.check}
+        </div>
+      </div>
       <BonusLogger dayData={dayData} onUpdate={onUpdate} />
     </div>
   );
