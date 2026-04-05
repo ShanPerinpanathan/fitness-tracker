@@ -85,7 +85,13 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-
 .set-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .set-btn{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:40px;transition:all .15s}
 .set-done{background:var(--acc);border-color:var(--acc);color:white}
-.cardio-reminder{background:var(--bg3);border:1px dashed var(--bdr);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt3);flex-wrap:wrap}
+.cardio-check-row{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s}
+.cardio-check-row:active{opacity:.85}
+.cardio-check-left{display:flex;align-items:center;gap:12px}
+.cardio-check-title{font-size:14px;font-weight:700;color:var(--txt)}
+.cardio-check-spec{font-size:11px;color:var(--txt3);margin-top:2px}
+.cardio-chk{width:36px;height:36px;border:2px solid var(--bdr);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.cardio-chk-done{background:var(--acc3);border-color:var(--acc3);color:white}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:12px;color:var(--txt3);text-align:center}
 .empty-state h3{font-size:17px;color:var(--txt2)}
 .empty-state p{font-size:13px;line-height:1.6}
@@ -150,8 +156,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-
 .delta-bad{color:var(--acc)}
 .w-note-txt{font-size:11px;color:var(--txt3);width:100%}
 .w-del{background:none;border:none;color:var(--txt3);cursor:pointer;display:flex;align-items:center;flex-shrink:0;padding:2px}
-
-/* ─── Measurements Tab ───────────────────────────────────────── */
 .bf-progress-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px}
 .bf-progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .bf-progress-label{font-size:13px;font-weight:600;color:var(--txt2)}
