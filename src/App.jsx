@@ -4,6 +4,7 @@ import {
   todayKey, getDayKey, getMealType, isRestDay
 } from './data';
 import { useDb } from './useDb';
+import { FoodSearch } from './FoodSearch';
 import './index.css';
 
 // ─── Icons ───────────────────────────────────────────────────────
@@ -719,9 +720,58 @@ function WorkoutTab({ date, dayData, onUpdate, sched }) {
 function NutritionTab({ date, dayData, onUpdate }) {
   const plan = MEALS[getMealType(date)];
   const toggle = id => onUpdate({ ...dayData, meals: { ...dayData?.meals, [id]: !dayData?.meals?.[id] } });
+
+  // Sum all custom food macros logged today
+  const allCustom = Object.values(dayData?.customFoods || {}).flat();
+  const customTotals = allCustom.reduce((acc, f) => ({
+    carbs:   acc.carbs   + (f.carbs   || 0),
+    protein: acc.protein + (f.protein || 0),
+    fats:    acc.fats    + (f.fats    || 0),
+    cal:     acc.cal     + (f.cal     || 0),
+  }), { carbs: 0, protein: 0, fats: 0, cal: 0 });
+
+  const remaining = {
+    carbs:   Math.max(0, plan.macros.carbs   - Math.round(customTotals.carbs)),
+    protein: Math.max(0, plan.macros.protein - Math.round(customTotals.protein)),
+    fats:    Math.max(0, plan.macros.fats    - Math.round(customTotals.fats)),
+  };
+  const over = customTotals.carbs > plan.macros.carbs || customTotals.protein > plan.macros.protein || customTotals.fats > plan.macros.fats;
+
   return (
     <div className="tab-content">
-      <div className="section-header"><div className="section-title">Nutrition</div><div className="section-sub">{plan.label} · {plan.macros.carbs}C / {plan.macros.protein}P / {plan.macros.fats}F</div></div>
+      <div className="section-header">
+        <div className="section-title">Nutrition</div>
+        <div className="section-sub">{plan.label} · {plan.macros.carbs}C / {plan.macros.protein}P / {plan.macros.fats}F</div>
+      </div>
+
+      {/* Live macro budget */}
+      <div className="macro-budget-card">
+        <div className="mb-row">
+          <div className="mb-item">
+            <span className="mb-val" style={{ color: customTotals.carbs > plan.macros.carbs ? '#E94560' : '#f59e0b' }}>{Math.round(customTotals.cal)}</span>
+            <span className="mb-lbl">cal logged</span>
+          </div>
+          <div className="mb-divider" />
+          <div className="mb-item">
+            <span className="mb-val" style={{ color: customTotals.carbs > plan.macros.carbs ? '#E94560' : '#E94560' }}>{Math.round(customTotals.carbs)}g</span>
+            <span className="mb-lbl">carbs used</span>
+          </div>
+          <div className="mb-divider" />
+          <div className="mb-item">
+            <span className="mb-val" style={{ color: '#10B981' }}>{Math.round(customTotals.protein)}g</span>
+            <span className="mb-lbl">protein used</span>
+          </div>
+          <div className="mb-divider" />
+          <div className="mb-item">
+            <span className="mb-val" style={{ color: over ? '#E94560' : 'var(--txt2)' }}>
+              {over ? 'Over!' : remaining.carbs + 'g'}
+            </span>
+            <span className="mb-lbl">{over ? 'budget' : 'carbs left'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Blueprint meals + food search per section */}
       {Object.entries(plan.meals).map(([key, items]) => (
         <div key={key} className="meal-group">
           <div className="meal-header">{MEAL_LABELS[key].emoji} {MEAL_LABELS[key].label}</div>
@@ -734,6 +784,16 @@ function NutritionTab({ date, dayData, onUpdate }) {
               </div>
             );
           })}
+          <div style={{ padding: '8px 14px 12px' }}>
+            <FoodSearch
+              mealKey={key}
+              mealLabel={MEAL_LABELS[key].label}
+              dayData={dayData}
+              onUpdate={onUpdate}
+              macroTargets={plan.macros}
+              alreadyLoggedMacros={customTotals}
+            />
+          </div>
         </div>
       ))}
     </div>

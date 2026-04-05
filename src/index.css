@@ -85,13 +85,7 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-
 .set-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .set-btn{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:40px;transition:all .15s}
 .set-done{background:var(--acc);border-color:var(--acc);color:white}
-.cardio-check-row{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s}
-.cardio-check-row:active{opacity:.85}
-.cardio-check-left{display:flex;align-items:center;gap:12px}
-.cardio-check-title{font-size:14px;font-weight:700;color:var(--txt)}
-.cardio-check-spec{font-size:11px;color:var(--txt3);margin-top:2px}
-.cardio-chk{width:36px;height:36px;border:2px solid var(--bdr);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-.cardio-chk-done{background:var(--acc3);border-color:var(--acc3);color:white}
+.cardio-reminder{background:var(--bg3);border:1px dashed var(--bdr);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt3);flex-wrap:wrap}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:12px;color:var(--txt3);text-align:center}
 .empty-state h3{font-size:17px;color:var(--txt2)}
 .empty-state p{font-size:13px;line-height:1.6}
@@ -156,6 +150,8 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-
 .delta-bad{color:var(--acc)}
 .w-note-txt{font-size:11px;color:var(--txt3);width:100%}
 .w-del{background:none;border:none;color:var(--txt3);cursor:pointer;display:flex;align-items:center;flex-shrink:0;padding:2px}
+
+/* ─── Measurements Tab ───────────────────────────────────────── */
 .bf-progress-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px}
 .bf-progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .bf-progress-label{font-size:13px;font-weight:600;color:var(--txt2)}
@@ -191,3 +187,66 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-
 .meas-hist-grid{display:flex;flex-wrap:wrap;gap:6px}
 .meas-hist-item{font-size:11px;color:var(--txt2);background:var(--bg3);border-radius:6px;padding:3px 8px}
 .meas-hist-key{color:var(--txt3);margin-right:3px}
+
+/* ─── Cardio checkbox row (Workout tab) ──────────────────────── */
+.cardio-check-row{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .2s}
+.cardio-check-row:active{opacity:.85}
+.cardio-check-left{display:flex;align-items:center;gap:12px}
+.cardio-check-title{font-size:14px;font-weight:700;color:var(--txt)}
+.cardio-check-spec{font-size:11px;color:var(--txt3);margin-top:2px}
+.cardio-chk{width:36px;height:36px;border:2px solid var(--bdr);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.cardio-chk-done{background:var(--acc3);border-color:var(--acc3);color:white}
+
+/* ─── Food Search ────────────────────────────────────────────── */
+.food-search-wrap{display:flex;flex-direction:column;gap:8px}
+.food-search-btn{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px dashed var(--bdr);border-radius:var(--rs);padding:10px 14px;font-size:13px;font-weight:600;color:var(--acc2);cursor:pointer;width:100%;transition:all .15s}
+.food-search-btn:active{opacity:.8}
+.food-search-panel{display:flex;flex-direction:column;gap:10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:12px}
+.fs-input-row{display:flex;gap:8px;align-items:center}
+.fs-input{flex:1;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);color:var(--txt);padding:10px 12px;font-size:14px;outline:none;font-family:inherit}
+.fs-input:focus{border-color:var(--acc2)}
+.fs-close-btn{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);color:var(--txt3);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px}
+.fs-status{font-size:13px;color:var(--txt3);text-align:center;padding:8px 0}
+.fs-results{display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto}
+.fs-result-item{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;cursor:pointer;transition:border-color .15s}
+.fs-result-item:active{border-color:var(--acc2)}
+.fs-result-name{font-size:13px;font-weight:600;color:var(--txt);line-height:1.3;margin-bottom:3px}
+.fs-result-brand{font-size:11px;color:var(--txt3);margin-bottom:4px}
+.fs-result-macros{display:flex;gap:10px;font-size:11px;font-weight:600;color:var(--txt2);flex-wrap:wrap}
+.fs-calculator{display:flex;flex-direction:column;gap:12px}
+.fs-calc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.fs-calc-name{font-size:14px;font-weight:700;color:var(--txt);line-height:1.3}
+.fs-calc-brand{font-size:11px;color:var(--txt3);margin-top:2px}
+.fs-back-btn{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);padding:5px 10px;font-size:11px;color:var(--txt2);cursor:pointer;flex-shrink:0;font-family:inherit}
+.fs-grams-row{display:flex;align-items:center;gap:10px}
+.fs-grams-label{font-size:12px;color:var(--txt3);flex-shrink:0;width:60px}
+.fs-slider{flex:1;accent-color:var(--acc2)}
+.fs-grams-input-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.fs-grams-input{width:56px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);color:var(--txt);padding:6px 8px;font-size:14px;font-weight:700;text-align:center;outline:none;font-family:inherit}
+.fs-grams-unit{font-size:12px;color:var(--txt3);font-weight:600}
+.fs-macro-row{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px 8px;gap:4px}
+.fs-extra-macros{display:flex;gap:16px;font-size:12px;color:var(--txt3)}
+.fs-budget{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px}
+.fs-budget-title{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.fs-verdict{font-size:12px;font-weight:600;padding:8px 12px;border-radius:var(--rs);text-align:center}
+.verdict-ok{background:#10B98120;color:#10B981}
+.verdict-warn{background:#E9456020;color:#E94560}
+.fs-action-row{display:flex;gap:8px}
+.fs-cancel-btn{flex:1;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);padding:11px;font-size:13px;color:var(--txt2);cursor:pointer;font-family:inherit}
+.fs-log-btn{flex:2;background:var(--acc2);border:none;border-radius:var(--rs);padding:11px;font-size:13px;font-weight:700;color:white;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.fs-log-btn:active{opacity:.8}
+.custom-foods-list{display:flex;flex-direction:column;gap:4px}
+.custom-food-item{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rs);padding:8px 12px}
+.cf-main{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.cf-name{font-size:13px;font-weight:600;color:var(--txt);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cf-grams{font-size:11px;color:var(--txt3);flex-shrink:0;margin-left:8px}
+.cf-macros{display:flex;gap:8px;font-size:11px;font-weight:600;align-items:center;flex-wrap:wrap}
+.cf-del{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:12px;margin-left:auto;flex-shrink:0;padding:2px 4px}
+
+/* ─── Macro budget card (Nutrition tab) ──────────────────────── */
+.macro-budget-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px}
+.mb-row{display:flex;align-items:center;justify-content:space-around}
+.mb-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.mb-val{font-size:16px;font-weight:800}
+.mb-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.mb-divider{width:1px;height:30px;background:var(--bdr)}
