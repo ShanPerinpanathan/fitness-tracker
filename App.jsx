@@ -724,14 +724,34 @@ function NutritionTab({ date, dayData, onUpdate }) {
   const plan = MEALS[getMealType(date)];
   const toggle = id => onUpdate({ ...dayData, meals: { ...dayData?.meals, [id]: !dayData?.meals?.[id] } });
 
-  // Sum all custom food macros logged today
+  // Sum checked blueprint meal macros
+  const checkedMeals = dayData?.meals || {};
+  const blueprintTotals = Object.values(plan.meals).flat().reduce((acc, item) => {
+    if (checkedMeals[item.id]) {
+      acc.cal     += item.cal     || 0;
+      acc.carbs   += item.carbs   || 0;
+      acc.protein += item.protein || 0;
+      acc.fats    += item.fats    || 0;
+    }
+    return acc;
+  }, { cal: 0, carbs: 0, protein: 0, fats: 0 });
+
+  // Sum custom searched foods
   const allCustom = Object.values(dayData?.customFoods || {}).flat();
-  const customTotals = allCustom.reduce((acc, f) => ({
+  const customFoodTotals = allCustom.reduce((acc, f) => ({
     carbs:   acc.carbs   + (f.carbs   || 0),
     protein: acc.protein + (f.protein || 0),
     fats:    acc.fats    + (f.fats    || 0),
     cal:     acc.cal     + (f.cal     || 0),
   }), { carbs: 0, protein: 0, fats: 0, cal: 0 });
+
+  // Combined totals — blueprint checked + custom searched
+  const customTotals = {
+    cal:     blueprintTotals.cal     + customFoodTotals.cal,
+    carbs:   blueprintTotals.carbs   + customFoodTotals.carbs,
+    protein: blueprintTotals.protein + customFoodTotals.protein,
+    fats:    blueprintTotals.fats    + customFoodTotals.fats,
+  };
 
   const remaining = {
     carbs:   Math.max(0, plan.macros.carbs   - Math.round(customTotals.carbs)),
