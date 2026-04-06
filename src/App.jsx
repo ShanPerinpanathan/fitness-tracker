@@ -597,6 +597,145 @@ function MeasurementsTab({ db }) {
   );
 }
 
+
+// ─── Treadmill Calculator ─────────────────────────────────────────
+// MET values for incline 8.0 treadmill walking at various speeds
+// Source: Compendium of Physical Activities (Ainsworth 2011)
+const getMET = (speed) => {
+  // speed in mph, incline 8% adds ~2 MET units to flat walking MET
+  if (speed <= 2.0) return 4.5;
+  if (speed <= 2.5) return 5.0;
+  if (speed <= 3.0) return 5.8;
+  if (speed <= 3.5) return 6.5;
+  if (speed <= 4.0) return 7.5;
+  if (speed <= 4.5) return 8.5;
+  if (speed <= 5.0) return 9.8;
+  return 11.0;
+};
+
+// Steps per minute at various speeds (approx cadence for walking/jogging)
+const getStepsPerMin = (speed) => {
+  if (speed <= 2.0) return 88;
+  if (speed <= 2.5) return 96;
+  if (speed <= 3.0) return 105;
+  if (speed <= 3.5) return 114;
+  if (speed <= 4.0) return 122;
+  if (speed <= 4.5) return 140;
+  if (speed <= 5.0) return 158;
+  return 175;
+};
+
+const WEIGHT_KG = 84.8; // 187 lbs in kg
+
+function calcTreadmill(speed, duration) {
+  const s = parseFloat(speed);
+  const d = parseFloat(duration);
+  if (!s || !d || s <= 0 || d <= 0) return null;
+  const met      = getMET(s);
+  const calBurn  = Math.round(met * WEIGHT_KG * (d / 60));
+  const stepCount = Math.round(getStepsPerMin(s) * d);
+  return { speed: s, duration: d, calBurn, stepCount, met };
+}
+
+function TreadmillLogger({ dayData, onUpdate }) {
+  const saved   = dayData?.treadmill || null;
+  const [open,  setOpen]  = useState(!saved);
+  const [speed, setSpeed] = useState(saved?.speed?.toString() || '3.5');
+  const [dur,   setDur]   = useState(saved?.duration?.toString() || '');
+  const [flash, setFlash] = useState(false);
+
+  const preview = calcTreadmill(speed, dur);
+
+  const save = () => {
+    if (!preview) return;
+    onUpdate({ ...dayData, treadmill: { ...preview, done: true }, cardio: true });
+    setOpen(false);
+    setFlash(true);
+    setTimeout(() => setFlash(false), 2000);
+  };
+
+  const clear = () => {
+    const next = { ...dayData };
+    delete next.treadmill;
+    next.cardio = false;
+    onUpdate(next);
+    setOpen(true);
+    setDur('');
+  };
+
+  if (!open && saved?.done) {
+    return (
+      <div className="tmill-saved" onClick={() => setOpen(true)}>
+        <span style={{ color: '#6C63FF', display:'flex', alignItems:'center' }}>{IC.run}</span>
+        <div className="tmill-saved-info">
+          <div className="tmill-saved-title">
+            Treadmill — {saved.duration} min @ {saved.speed} mph
+          </div>
+          <div className="tmill-saved-sub">
+            ~{saved.calBurn} cal · ~{saved.stepCount.toLocaleString()} steps · Incline 8.0
+          </div>
+        </div>
+        <div className="tmill-done-badge">{IC.check}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tmill-form">
+      <div className="tmill-header">
+        <span style={{ color: '#6C63FF', display:'flex', alignItems:'center' }}>{IC.run}</span>
+        <div className="tmill-title">Log Treadmill Session</div>
+        {saved?.done && (
+          <button className="tmill-clear" onClick={clear}>Clear</button>
+        )}
+      </div>
+
+      <div className="tmill-row">
+        <div className="tmill-field">
+          <div className="tmill-label">Speed (mph)</div>
+          <input type="number" className="tmill-input" value={speed}
+            onChange={e => setSpeed(e.target.value)} step="0.5" min="1" max="8"
+            inputMode="decimal" />
+        </div>
+        <div className="tmill-field">
+          <div className="tmill-label">Duration (min)</div>
+          <input type="number" className="tmill-input" value={dur}
+            onChange={e => setDur(e.target.value)} step="1" min="1" max="180"
+            inputMode="numeric" placeholder="e.g. 42" />
+        </div>
+        <div className="tmill-field">
+          <div className="tmill-label">Incline</div>
+          <div className="tmill-fixed">8.0</div>
+        </div>
+      </div>
+
+      {preview && (
+        <div className="tmill-preview">
+          <div className="tmill-prev-item">
+            <span className="tmill-prev-val" style={{ color: '#E94560' }}>{preview.calBurn}</span>
+            <span className="tmill-prev-lbl">cal burned</span>
+          </div>
+          <div className="tmill-prev-div" />
+          <div className="tmill-prev-item">
+            <span className="tmill-prev-val" style={{ color: '#6C63FF' }}>{preview.stepCount.toLocaleString()}</span>
+            <span className="tmill-prev-lbl">est. steps</span>
+          </div>
+          <div className="tmill-prev-div" />
+          <div className="tmill-prev-item">
+            <span className="tmill-prev-val" style={{ color: '#10B981' }}>{preview.met}</span>
+            <span className="tmill-prev-lbl">MET</span>
+          </div>
+        </div>
+      )}
+
+      <button className="tmill-save-btn" onClick={save} disabled={!preview}
+        style={{ background: flash ? '#10B981' : undefined }}>
+        {flash ? 'Saved!' : 'Save Session'}
+      </button>
+    </div>
+  );
+}
+
 // ─── Calorie burn estimates per workout type ─────────────────────
 // Based on 187lb male, moderate intensity dumbbell training
 const WORKOUT_BURN = {
@@ -613,7 +752,7 @@ function CalorieSummary({ date, dayData, sched }) {
   const mealType = getMealType(date);
   const plan     = MEALS[mealType];
 
-  // Calories consumed — blueprint checked + custom foods
+  // ── Calories IN ─────────────────────────────────────────────
   const checkedMeals = dayData?.meals || {};
   const blueprintCal = Object.values(plan.meals).flat().reduce((acc, item) =>
     checkedMeals[item.id] ? acc + (item.cal || 0) : acc, 0);
@@ -621,7 +760,8 @@ function CalorieSummary({ date, dayData, sched }) {
     .reduce((acc, f) => acc + (f.cal || 0), 0);
   const totalIn = blueprintCal + customCal;
 
-  // Calories burned — workout + cardio if checked
+  // ── Calories BURNED ──────────────────────────────────────────
+  // 1. Resistance workout (proportional to sets completed)
   const workoutBurn = dayKey && dayData?.exercises
     ? (() => {
         const workout = WORKOUTS[dayKey];
@@ -630,15 +770,31 @@ function CalorieSummary({ date, dayData, sched }) {
         const doneSets  = workout.exercises.reduce((acc, ex) =>
           acc + (dayData.exercises?.[ex.id] || []).filter(Boolean).length, 0);
         const pct = totalSets > 0 ? doneSets / totalSets : 0;
-        const base = WORKOUT_BURN[dayKey]?.burn || 0;
-        return Math.round(base * pct);
+        return Math.round((WORKOUT_BURN[dayKey]?.burn || 0) * pct);
       })()
-    : sched.type === 'cardio' && dayData?.cardio ? WORKOUT_BURN.sunday.burn : 0;
+    : (sched.type === 'cardio' && dayData?.cardio ? WORKOUT_BURN.sunday.burn : 0);
 
-  const cardioBurn = dayData?.cardio && sched.type !== 'cardio' ? CARDIO_BURN_20 : 0;
-  const totalBurn  = workoutBurn + cardioBurn;
-  const netCal     = totalIn - totalBurn;
-  const deficit    = totalBurn > 0 || totalIn > 0;
+  // 2. Treadmill — use logged speed/duration if available, else 0
+  const tmill      = dayData?.treadmill || null;
+  const cardioTicked = !!(tmill?.done);
+  const cardioBurn = tmill?.done ? (tmill.calBurn || 0) : 0;
+
+  // 3. Steps — subtract treadmill steps to avoid double count
+  const steps          = dayData?.steps || 0;
+  const treadmillSteps = tmill?.done ? (tmill.stepCount || 0) : 0;
+  const extraSteps     = Math.max(0, steps - treadmillSteps);
+  const stepsBurn      = Math.round(extraSteps * 0.04);
+
+  const totalBurn = workoutBurn + cardioBurn + stepsBurn;
+  const netCal    = totalIn - totalBurn;
+
+  // Build breakdown note
+  const parts = [];
+  if (workoutBurn > 0) parts.push(`Workout: ~${workoutBurn} cal`);
+  if (cardioBurn > 0 && tmill) parts.push(`Treadmill ${tmill.duration}min @ ${tmill.speed}mph: ~${cardioBurn} cal`);
+  if (stepsBurn  > 0)  parts.push(`Extra steps (${extraSteps.toLocaleString()}): ~${stepsBurn} cal`);
+  if (steps > 0 && stepsBurn === 0 && cardioTicked) parts.push(`Steps covered by treadmill`);
+  const note = parts.length > 0 ? parts.join(' · ') : 'Log food, complete workout, or add steps to track';
 
   return (
     <div className="cal-summary-card">
@@ -667,11 +823,7 @@ function CalorieSummary({ date, dayData, sched }) {
           </div>
         </div>
       </div>
-      <div className="cs-note">
-        {totalBurn > 0
-          ? `${workoutBurn > 0 ? `Workout: ~${workoutBurn} cal` : ''}${workoutBurn > 0 && cardioBurn > 0 ? ' · ' : ''}${cardioBurn > 0 ? `Cardio: ~${cardioBurn} cal` : ''}`
-          : 'Complete a workout or cardio to see calories burned'}
-      </div>
+      <div className="cs-note">{note}</div>
     </div>
   );
 }
@@ -738,14 +890,7 @@ function TodayTab({ date, dayData, onUpdate, sched, db }) {
       </div>
 
       {(sched.type === 'workout' || sched.type === 'cardio') && (
-        <div className="cardio-row" onClick={() => onUpdate({ ...dayData, cardio: !dayData?.cardio })}>
-          {IC.run}
-          <div className="cardio-info">
-            <div className="cardio-name">{sched.type === 'cardio' ? '45 min Cardio' : '20 min Post-Workout Cardio'}</div>
-            <div className="cardio-spec">Incline 8.0 · Speed 2.0</div>
-          </div>
-          <div className={`cardio-check ${dayData?.cardio ? 'cardio-done' : ''}`}>{dayData?.cardio && IC.check}</div>
-        </div>
+        <TreadmillLogger dayData={dayData} onUpdate={onUpdate} />
       )}
 
       {/* Calories burned + intake summary */}
@@ -786,18 +931,7 @@ function WorkoutTab({ date, dayData, onUpdate, sched }) {
             onToggle={() => setExpandedId(expandedId === ex.id ? null : ex.id)} />
         ))}
       </div>
-      <div className="cardio-check-row" onClick={() => onUpdate({ ...dayData, cardio: !dayData?.cardio })}>
-        <div className="cardio-check-left">
-          <span style={{ color: '#6C63FF' }}>{IC.run}</span>
-          <div>
-            <div className="cardio-check-title">{sched.type === 'cardio' ? '45 min Cardio' : '20 min Post-Workout Cardio'}</div>
-            <div className="cardio-check-spec">Incline 8.0 · Speed 2.0</div>
-          </div>
-        </div>
-        <div className={`cardio-chk ${dayData?.cardio ? 'cardio-chk-done' : ''}`}>
-          {dayData?.cardio && IC.check}
-        </div>
-      </div>
+      <TreadmillLogger dayData={dayData} onUpdate={onUpdate} />
       <BonusLogger dayData={dayData} onUpdate={onUpdate} />
     </div>
   );
