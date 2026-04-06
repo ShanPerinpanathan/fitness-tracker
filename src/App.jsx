@@ -595,6 +595,93 @@ function MeasurementsTab({ db }) {
   );
 }
 
+// ─── Calorie burn estimates per workout type ─────────────────────
+// Based on 187lb male, moderate intensity dumbbell training
+const WORKOUT_BURN = {
+  tuesday:   { label: 'Push Day',        burn: 280 },
+  wednesday: { label: 'Back + Biceps',   burn: 300 },
+  thursday:  { label: 'Leg Day',         burn: 380 },
+  saturday:  { label: 'Arms & Shoulders',burn: 250 },
+  sunday:    { label: 'Cardio 45min',    burn: 320 },
+};
+const CARDIO_BURN_20 = 130; // 20 min post-workout incline walk
+
+function CalorieSummary({ date, dayData, sched }) {
+  const dayKey   = getDayKey(date);
+  const mealType = getMealType(date);
+  const plan     = MEALS[mealType];
+
+  // Calories consumed — blueprint checked + custom foods
+  const checkedMeals = dayData?.meals || {};
+  const blueprintCal = Object.values(plan.meals).flat().reduce((acc, item) =>
+    checkedMeals[item.id] ? acc + (item.cal || 0) : acc, 0);
+  const customCal = Object.values(dayData?.customFoods || {}).flat()
+    .reduce((acc, f) => acc + (f.cal || 0), 0);
+  const totalIn = blueprintCal + customCal;
+
+  // Calories burned — workout + cardio if checked
+  const workoutBurn = dayKey && dayData?.exercises
+    ? (() => {
+        const workout = WORKOUTS[dayKey];
+        if (!workout) return 0;
+        const totalSets = workout.exercises.reduce((a, ex) => a + ex.sets, 0);
+        const doneSets  = workout.exercises.reduce((acc, ex) =>
+          acc + (dayData.exercises?.[ex.id] || []).filter(Boolean).length, 0);
+        const pct = totalSets > 0 ? doneSets / totalSets : 0;
+        const base = WORKOUT_BURN[dayKey]?.burn || 0;
+        return Math.round(base * pct);
+      })()
+    : sched.type === 'cardio' && dayData?.cardio ? WORKOUT_BURN.sunday.burn : 0;
+
+  const cardioBurn = dayData?.cardio && sched.type !== 'cardio' ? CARDIO_BURN_20 : 0;
+  const totalBurn  = workoutBurn + cardioBurn;
+  const netCal     = totalIn - totalBurn;
+  const deficit    = totalBurn > 0 || totalIn > 0;
+
+  if (!deficit && totalIn === 0) return null;
+
+  return (
+    <div className="cal-summary-card">
+      <div className="cs-row">
+        <div className="cs-item">
+          <div className="cs-icon" style={{ background: '#10B98120' }}>🍽️</div>
+          <div>
+            <div className="cs-val" style={{ color: '#f59e0b' }}>{totalIn} cal</div>
+            <div className="cs-lbl">consumed</div>
+          </div>
+        </div>
+        {totalBurn > 0 && (
+          <>
+            <div className="cs-minus">−</div>
+            <div className="cs-item">
+              <div className="cs-icon" style={{ background: '#E9456020' }}>🔥</div>
+              <div>
+                <div className="cs-val" style={{ color: '#E94560' }}>{totalBurn} cal</div>
+                <div className="cs-lbl">burned</div>
+              </div>
+            </div>
+            <div className="cs-equals">=</div>
+            <div className="cs-item">
+              <div className="cs-icon" style={{ background: netCal <= CAL_TARGET ? '#10B98120' : '#E9456020' }}>⚖️</div>
+              <div>
+                <div className="cs-val" style={{ color: netCal <= CAL_TARGET ? '#10B981' : '#E94560' }}>{netCal} cal</div>
+                <div className="cs-lbl">net today</div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      {totalBurn > 0 && (
+        <div className="cs-note">
+          {workoutBurn > 0 && `Workout: ~${workoutBurn} cal`}
+          {workoutBurn > 0 && cardioBurn > 0 && ' · '}
+          {cardioBurn > 0 && `Cardio: ~${cardioBurn} cal`}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Today Tab ───────────────────────────────────────────────────
 function TodayTab({ date, dayData, onUpdate, sched, db }) {
   const dayKey = getDayKey(date);
@@ -666,6 +753,9 @@ function TodayTab({ date, dayData, onUpdate, sched, db }) {
           <div className={`cardio-check ${dayData?.cardio ? 'cardio-done' : ''}`}>{dayData?.cardio && IC.check}</div>
         </div>
       )}
+
+      {/* Calories burned + intake summary */}
+      <CalorieSummary date={date} dayData={dayData} sched={sched} />
 
       <BonusLogger dayData={dayData} onUpdate={onUpdate} />
     </div>
@@ -880,14 +970,29 @@ function WeightTab({ db }) {
   const [input, setInput]     = useState('');
   const [note, setNote]       = useState('');
   const [loaded, setLoaded]   = useState(false);
+  const [saving, setSaving]   = useState(false);
+  const [saved,  setSaved]    = useState(false);
 
   useEffect(() => { db.loadWeights().then(w => { setWeights(w); setLoaded(true); }); }, []);
 
   const add = async () => {
-    if (!input) return;
-    const updated = await db.saveWeight(todayKey(), input, note);
-    setWeights(updated); setInput(''); setNote('');
+    const val = parseFloat(input);
+    if (!input || isNaN(val) || val <= 0) return;
+    setSaving(true);
+    try {
+      const updated = await db.saveWeight(todayKey(), val, note);
+      setWeights(updated);
+      setInput(''); setNote('');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      console.error('Weight save error:', e);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const handleKey = (e) => { if (e.key === 'Enter') add(); };
 
   const del = async (date) => {
     const updated = await db.deleteWeight(date);
@@ -926,12 +1031,17 @@ function WeightTab({ db }) {
       )}
 
       <div className="weight-form">
-        <div className="weight-form-title">Log weight</div>
+        <div className="weight-form-title">Log today's weight</div>
         <div className="weight-form-row">
-          <input type="number" className="w-input" placeholder="lbs" value={input} onChange={e => setInput(e.target.value)} step="0.1" />
-          <input type="text" className="w-note" placeholder="Note (optional)" value={note} onChange={e => setNote(e.target.value)} />
-          <button className="w-add-btn" onClick={add}>{IC.plus}</button>
+          <input type="number" className="w-input" placeholder="lbs" value={input}
+            onChange={e => setInput(e.target.value)} onKeyDown={handleKey} step="0.1" inputMode="decimal" />
+          <input type="text" className="w-note" placeholder="Note (optional)" value={note}
+            onChange={e => setNote(e.target.value)} onKeyDown={handleKey} />
+          <button className="w-add-btn" onClick={add} disabled={saving} style={{ background: saved ? '#10B981' : undefined }}>
+            {saved ? IC.check : saving ? '…' : IC.plus}
+          </button>
         </div>
+        {saved && <div style={{ fontSize:12, color:'#10B981', marginTop:6, textAlign:'center', fontWeight:600 }}>✓ Weight saved!</div>}
       </div>
 
       <div className="meal-group">
