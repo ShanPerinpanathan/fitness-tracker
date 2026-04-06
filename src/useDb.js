@@ -47,7 +47,10 @@ export function useDb() {
 
   const saveWeight = useCallback(async (date, weight, note = '') => {
     const entry = { user_id: USER_ID, date, weight: parseFloat(weight), note };
-    if (online) { try { await supabase.from('weights').upsert(entry, { onConflict: 'user_id,date' }); } catch {} }
+    if (online) {
+      const { error } = await supabase.from('weights').upsert(entry, { onConflict: 'user_id,date' });
+      if (error) console.error('Supabase saveWeight error:', error);
+    }
     const all = lsGet('blueprint_weights', []);
     const updated = [entry, ...all.filter(w => w.date !== date)].sort((a, b) => b.date.localeCompare(a.date));
     lsSet('blueprint_weights', updated);
