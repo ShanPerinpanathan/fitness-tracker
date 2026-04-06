@@ -23,6 +23,7 @@ const IC = {
   link:     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
   flame:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.4 0 2.5-1.1 2.5-2.5 0-1.4-.9-2.7-2.5-4-1.6 1.3-2.5 2.6-2.5 4zM12 2c0 5 4 7 4 12a4 4 0 0 1-8 0c0-5 4-7 4-12z"/></svg>,
   body:     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="4" r="2"/><path d="M12 8c-4 0-6 2-6 5v3h3l1 6h4l1-6h3v-3c0-3-2-5-6-5z"/></svg>,
+  steps:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 4c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zM5 20l3-8 2 3 3-5 2 2 3-4"/></svg>,
   trash:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
   cloud:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>,
   star:     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
@@ -37,6 +38,7 @@ const NAV = [
   { id: 'workout',      icon: 'dumbbell', label: 'Workout'  },
   { id: 'food',         icon: 'food',     label: 'Nutrition'},
   { id: 'supps',        icon: 'pill',     label: 'Supps'    },
+  { id: 'steps',        icon: 'steps',    label: 'Steps'    },
   { id: 'weight',       icon: 'scale',    label: 'Weight'   },
   { id: 'measurements', icon: 'body',     label: 'Body'     },
   { id: 'progress',     icon: 'trend',    label: 'Progress' },
@@ -638,46 +640,38 @@ function CalorieSummary({ date, dayData, sched }) {
   const netCal     = totalIn - totalBurn;
   const deficit    = totalBurn > 0 || totalIn > 0;
 
-  if (!deficit && totalIn === 0) return null;
-
   return (
     <div className="cal-summary-card">
       <div className="cs-row">
         <div className="cs-item">
-          <div className="cs-icon" style={{ background: '#10B98120' }}>🍽️</div>
+          <div className="cs-icon" style={{ background: '#f59e0b20' }}>🍽️</div>
           <div>
             <div className="cs-val" style={{ color: '#f59e0b' }}>{totalIn} cal</div>
             <div className="cs-lbl">consumed</div>
           </div>
         </div>
-        {totalBurn > 0 && (
-          <>
-            <div className="cs-minus">−</div>
-            <div className="cs-item">
-              <div className="cs-icon" style={{ background: '#E9456020' }}>🔥</div>
-              <div>
-                <div className="cs-val" style={{ color: '#E94560' }}>{totalBurn} cal</div>
-                <div className="cs-lbl">burned</div>
-              </div>
-            </div>
-            <div className="cs-equals">=</div>
-            <div className="cs-item">
-              <div className="cs-icon" style={{ background: netCal <= CAL_TARGET ? '#10B98120' : '#E9456020' }}>⚖️</div>
-              <div>
-                <div className="cs-val" style={{ color: netCal <= CAL_TARGET ? '#10B981' : '#E94560' }}>{netCal} cal</div>
-                <div className="cs-lbl">net today</div>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-      {totalBurn > 0 && (
-        <div className="cs-note">
-          {workoutBurn > 0 && `Workout: ~${workoutBurn} cal`}
-          {workoutBurn > 0 && cardioBurn > 0 && ' · '}
-          {cardioBurn > 0 && `Cardio: ~${cardioBurn} cal`}
+        <div className="cs-minus">−</div>
+        <div className="cs-item">
+          <div className="cs-icon" style={{ background: '#E9456020' }}>🔥</div>
+          <div>
+            <div className="cs-val" style={{ color: '#E94560' }}>{totalBurn} cal</div>
+            <div className="cs-lbl">burned</div>
+          </div>
         </div>
-      )}
+        <div className="cs-equals">=</div>
+        <div className="cs-item">
+          <div className="cs-icon" style={{ background: netCal <= CAL_TARGET ? '#10B98120' : '#E9456020' }}>⚖️</div>
+          <div>
+            <div className="cs-val" style={{ color: netCal <= CAL_TARGET ? '#10B981' : '#E94560' }}>{netCal} cal</div>
+            <div className="cs-lbl">net today</div>
+          </div>
+        </div>
+      </div>
+      <div className="cs-note">
+        {totalBurn > 0
+          ? `${workoutBurn > 0 ? `Workout: ~${workoutBurn} cal` : ''}${workoutBurn > 0 && cardioBurn > 0 ? ' · ' : ''}${cardioBurn > 0 ? `Cardio: ~${cardioBurn} cal` : ''}`
+          : 'Complete a workout or cardio to see calories burned'}
+      </div>
     </div>
   );
 }
@@ -964,6 +958,128 @@ function SuppsTab({ date, dayData, onUpdate }) {
   );
 }
 
+
+// ─── Steps Tab ───────────────────────────────────────────────────
+const STEP_GOAL = 10000;
+
+function StepsTab({ date, dayData, onUpdate }) {
+  const [input, setInput] = useState('');
+  const [saved,  setSaved]  = useState(false);
+
+  const steps = dayData?.steps || 0;
+  const pct   = Math.min(100, Math.round((steps / STEP_GOAL) * 100));
+  const left  = Math.max(0, STEP_GOAL - steps);
+  const over  = steps > STEP_GOAL;
+
+  // Circle ring math
+  const r   = 54;
+  const circ = 2 * Math.PI * r;
+  const dash = circ * (pct / 100);
+
+  const logSteps = () => {
+    const val = parseInt(input);
+    if (!val || val < 0) return;
+    onUpdate({ ...dayData, steps: val });
+    setInput('');
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleKey = (e) => { if (e.key === 'Enter') logSteps(); };
+
+  return (
+    <div className="tab-content">
+      <div className="section-header">
+        <div className="section-title">Daily Steps</div>
+        <div className="section-sub">Goal: 10,000 steps · Log manually from StepsApp</div>
+      </div>
+
+      {/* Ring */}
+      <div className="steps-ring-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r={r} fill="none" stroke="var(--bg3)" strokeWidth="12" />
+          <circle cx="70" cy="70" r={r} fill="none"
+            stroke={over ? '#10B981' : pct >= 75 ? '#f59e0b' : '#E94560'}
+            strokeWidth="12"
+            strokeDasharray={`${dash} ${circ}`}
+            strokeLinecap="round"
+            transform="rotate(-90 70 70)"
+            style={{ transition: 'stroke-dasharray .5s ease' }}
+          />
+          <text x="70" y="64" textAnchor="middle" fontSize="22" fontWeight="800" fill="var(--txt)" fontFamily="DM Sans, sans-serif">
+            {steps.toLocaleString()}
+          </text>
+          <text x="70" y="82" textAnchor="middle" fontSize="11" fill="var(--txt3)" fontFamily="DM Sans, sans-serif">
+            steps
+          </text>
+          <text x="70" y="97" textAnchor="middle" fontSize="10" fontWeight="700"
+            fill={over ? '#10B981' : '#E94560'} fontFamily="DM Sans, sans-serif">
+            {over ? `+${(steps - STEP_GOAL).toLocaleString()} over!` : `${left.toLocaleString()} to go`}
+          </text>
+        </svg>
+        <div className="steps-pct-badge" style={{ color: over ? '#10B981' : pct >= 75 ? '#f59e0b' : '#E94560' }}>
+          {pct}%
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="stat-grid">
+        <div className="stat-card">
+          <div className="stat-val" style={{ color: '#E94560' }}>{STEP_GOAL.toLocaleString()}</div>
+          <div className="stat-lbl">Daily goal</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-val" style={{ color: steps >= STEP_GOAL ? '#10B981' : '#f59e0b' }}>{steps.toLocaleString()}</div>
+          <div className="stat-lbl">Today</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-val" style={{ color: '#6C63FF' }}>{Math.round(steps * 0.04)} cal</div>
+          <div className="stat-lbl">~Cals burned</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-val" style={{ color: '#10B981' }}>{(steps * 0.762 / 1000).toFixed(1)} km</div>
+          <div className="stat-lbl">~Distance</div>
+        </div>
+      </div>
+
+      {/* Log form */}
+      <div className="weight-form">
+        <div className="weight-form-title">Log steps from StepsApp</div>
+        <div className="steps-hint">Open StepsApp → check your total → type it here</div>
+        <div className="weight-form-row" style={{ marginTop: 10 }}>
+          <input
+            type="number"
+            className="w-input"
+            style={{ width: 100 }}
+            placeholder="steps"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            inputMode="numeric"
+          />
+          <div style={{ flex: 1, fontSize: 12, color: 'var(--txt3)', padding: '0 8px' }}>
+            Enter your total step count for today
+          </div>
+          <button className="w-add-btn" onClick={logSteps}
+            style={{ background: saved ? '#10B981' : undefined }}>
+            {saved ? IC.check : IC.plus}
+          </button>
+        </div>
+        {saved && <div style={{ fontSize:12, color:'#10B981', marginTop:6, textAlign:'center', fontWeight:600 }}>✓ Steps saved!</div>}
+      </div>
+
+      {/* How to use hint */}
+      <div className="steps-instructions">
+        <div className="steps-inst-title">How to log from StepsApp</div>
+        <div className="steps-inst-step"><span className="steps-inst-num">1</span> Open StepsApp on your iPhone</div>
+        <div className="steps-inst-step"><span className="steps-inst-num">2</span> Note your current step count</div>
+        <div className="steps-inst-step"><span className="steps-inst-num">3</span> Come back here and enter the number above</div>
+        <div className="steps-inst-step"><span className="steps-inst-num">4</span> Update it throughout the day as your steps increase</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Weight Tab ──────────────────────────────────────────────────
 function WeightTab({ db }) {
   const [weights, setWeights] = useState([]);
@@ -1107,6 +1223,7 @@ export default function App() {
         {tab === 'workout'      && <WorkoutTab      date={date} dayData={dayData} onUpdate={updateData} sched={sched} />}
         {tab === 'food'         && <NutritionTab    date={date} dayData={dayData} onUpdate={updateData} />}
         {tab === 'supps'        && <SuppsTab        date={date} dayData={dayData} onUpdate={updateData} />}
+        {tab === 'steps'        && <StepsTab        date={date} dayData={dayData} onUpdate={updateData} />}
         {tab === 'weight'       && <WeightTab       db={db} />}
         {tab === 'measurements' && <MeasurementsTab db={db} />}
         {tab === 'progress'     && <ProgressTab     db={db} />}
